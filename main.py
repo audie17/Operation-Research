@@ -36,9 +36,9 @@ def main():
     Main function
     """
     print (" Welcome")
-    file_name = "data.txt" 
-    data = rd("1.txt")
-    print(data)
+    
+    
+    disp.display_matrix('12')
 
 if __name__ == "__main__":
     main()
