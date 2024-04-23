@@ -6,7 +6,7 @@
 from read_data import read_data_from_file as rd
 from read_data import read_data_and_matrix as rm
 
-def display_trans_proposals(nb):
+def display_matrix(nb):
     """
     Displays the cost matrix along with provisions and orders.
     """
