@@ -18,7 +18,7 @@ def display_matrix(nb):
         provision_label = "P" + str(i+1)
         provision_costs = data_matrice["Provisions"][provision_label]
         provision_total = data_matrice["TotalProvisions"][i]
-        row = [provision_label] + provision_costs + [provision_total]
+        row = [provision_label] + ['\033[0;34m' + str(cost) + '\033[0m' for cost in provision_costs] + [provision_total]
         print('\t'.join(map(str, row)))
 
     # Print the orders row
