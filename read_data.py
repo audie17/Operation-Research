@@ -1,3 +1,7 @@
+# read_data.py
+# -*- coding: utf-8 -*-
+# ---------------------------------------------------------------------------
+
 def read_data_from_file(file_name):
     """
     read_data function reads the data from a text file and stores it in memory.
@@ -26,8 +30,9 @@ def read_data_from_file(file_name):
 
         # Store orders data
         for i in range(num_orders):
-            data["Orders"]["C"+str(i+1)] = orders_data[i] + [total_orders_data[i]]
+            data["Orders"]["C"+str(i+1)] = orders_data[i] # Exclude the last row
 
         data["TotalOrders"] = total_orders_data
 
     return data
+
