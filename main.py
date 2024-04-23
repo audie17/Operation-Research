@@ -36,7 +36,7 @@ def main():
     """
     test_nb = int(input("\nWelcome ! \nEnter the Transportation problem number (1 to 12):\n "))
     if 1 <= test_nb <= 12:
-        print("\n Transformation Problem :  \n")
+        print("\n Transportation Problem "+str(test_nb)+":\n")
         disp.display_trans_proposals(str(test_nb))
     else:
         print("\nWrong value, it needs to be between 1 and 12.")
