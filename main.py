@@ -10,7 +10,7 @@
 
          1. Read data from text file (.txt) and store in memory.
          2. Display of the following tables :
-            ⋆ Cost matrix V
+            ⋆ Cost matrix 
             ⋆ Transportation proposal 
             ⋆ Potential costs table
             ⋆ Marginal costs table
@@ -34,12 +34,19 @@ def main():
     """
     Main function
     """
-    print (" \nWelcome !\n\nChoose the graph you want to display (Between 1 and 12) : \n")
+    test_nb = int(input("\nWelcome ! \nEnter the problem number (1 to 12):\n "))
+    if 1 <= test_nb <= 12:
+        print("\n Transformation proposal :  \n")
+        disp.display_trans_proposals(str(test_nb))
+    else:
+        print("\nWrong value, it needs to be between 1 and 12.")
+        
+        
     
-    disp.display_matrix('1')
-    
-    print("\nTransformation proposal :  \n")
     
     
+    
+    
+''' Do not supp !! '''    
 if __name__ == "__main__":
     main()
