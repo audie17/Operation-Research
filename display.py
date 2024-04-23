@@ -1,10 +1,15 @@
+# display.py
+# -*- coding: utf-8 -*-
+# ---------------------------------------------------------------------------
+
+
 from read_data import read_data_from_file as rd
 
 def display_matrix(nb):
     """
     Displays the cost matrix along with provisions and orders.
     """
-    data_matrice= rd(nb + '.txt')
+    data_matrice= rd(nb+".txt")
     # Retrieve the number of provisions and orders from the data lengths
     num_provisions = len(data_matrice["Provisions"])
     num_orders = len(data_matrice["Orders"])

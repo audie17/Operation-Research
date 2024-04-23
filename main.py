@@ -30,15 +30,16 @@
         """
 from read_data import read_data_from_file as rd
 import display as disp
+import nord_west as nw
 
 def main():
     """
     Main function
     """
     print (" Welcome")
-    
-    
-    disp.display_matrix('12')
+    print(rd('2.txt'))
+    nw.north_west_algorithm(rd('2.txt'))
+    disp.display_matrix('2')
 
 if __name__ == "__main__":
     main()
