@@ -10,8 +10,8 @@
 
          1. Read data from text file (.txt) and store in memory.
          2. Display of the following tables :
-            ⋆ Cost matrix
-            ⋆ Transportation proposal
+            ⋆ Cost matrix 
+            ⋆ Transportation proposal 
             ⋆ Potential costs table
             ⋆ Marginal costs table
 
@@ -28,7 +28,6 @@
     This project is a part of the course SM602I - Operation Research (L3-INT - 2324S6)
         
         """
-from read_data import read_data_from_file as rd
 import display as disp
 import nord_west as nw
 
@@ -37,9 +36,9 @@ def main():
     Main function
     """
     print (" Welcome")
-    print(rd('2.txt'))
-    nw.north_west_algorithm(rd('2.txt'))
-    disp.display_matrix('2')
+    
+    
+    disp.display_matrix('12')
 
 if __name__ == "__main__":
     main()
