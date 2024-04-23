@@ -1,5 +1,5 @@
 from read_data import read_data_from_file as rd
-from display import display_matrix as disp
+from display import display_trans_proposals as disp
 
 def north_west_algorithm(matrix):
     provisions = matrix['Provisions']

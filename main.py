@@ -30,6 +30,7 @@
         """
 import display as disp
 import nord_west as nw
+import read_data as rd
 
 def main():
     """
@@ -37,8 +38,9 @@ def main():
     """
     print (" Welcome")
     
-    
-    disp.display_matrix('12')
+    print(rd.read_data_from_file('10.txt'))
+    disp.display_trans_proposals('10')
+    print(nw.north_west_algorithm(rd.read_data_from_file('10.txt')))
 
 if __name__ == "__main__":
     main()
