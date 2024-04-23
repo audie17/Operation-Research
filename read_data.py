@@ -31,3 +31,11 @@ def read_data_from_file(file_name):
         data["TotalOrders"] = total_orders_data
 
     return data
+
+def read_data_and_matrix(file_name):
+    """
+    Read data from file and extract the cost matrix.
+    """
+    data = read_data_from_file(file_name)
+    cost_matrix = [data["Provisions"][f"P{i+1}"] for i in range(len(data["Provisions"]))]
+    return cost_matrix
