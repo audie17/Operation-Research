@@ -1,6 +1,6 @@
 from read_data import read_data_from_file as rd
 
-def display_matrix(nb):
+def display_trans_proposals(nb):
     """
     Displays the cost matrix along with provisions and orders.
     """
@@ -23,4 +23,4 @@ def display_matrix(nb):
 
     # Print the orders row
     orders_row = ["Orders"] + data_matrice["TotalOrders"]
-    print('\t'.join(map(str, orders_row)))
+    print('\t'.join(map(str, orders_row)) + '\n')

@@ -10,8 +10,8 @@
 
          1. Read data from text file (.txt) and store in memory.
          2. Display of the following tables :
-            ⋆ Cost matrix
-            ⋆ Transportation proposal
+            ⋆ Cost matrix 
+            ⋆ Transportation proposal 
             ⋆ Potential costs table
             ⋆ Marginal costs table
 
@@ -28,17 +28,25 @@
     This project is a part of the course SM602I - Operation Research (L3-INT - 2324S6)
         
         """
-from read_data import read_data_from_file as rd
 import display as disp
 
 def main():
     """
     Main function
     """
-    print (" Welcome")
+    test_nb = int(input("\nWelcome ! \nEnter the problem number (1 to 12):\n "))
+    if 1 <= test_nb <= 12:
+        print("\n Transformation proposal :  \n")
+        disp.display_trans_proposals(str(test_nb))
+    else:
+        print("\nWrong value, it needs to be between 1 and 12.")
+        
+        
     
     
-    disp.display_matrix('12')
-
+    
+    
+    
+''' Do not supp !! '''    
 if __name__ == "__main__":
     main()
