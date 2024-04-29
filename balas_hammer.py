@@ -19,14 +19,23 @@ def compute_penalties(cost_matrix):
     This function computes the penalties of a given cost matrix
     """
     penalties = []
+    penalties_row = []
+    penalties_column = []
     for i in range(len(cost_matrix)):
         row = cost_matrix[i]
         sorted_row = sorted(row)
         penalty = sorted_row[1] - sorted_row[0]
-        penalties.append(penalty)
+        penalties_row.append(penalty)
+    for j in range(len(cost_matrix[0])):
+        column = [row[j] for row in cost_matrix]
+        sorted_column = sorted(column)
+        penalty = sorted_column[1] - sorted_column[0]
+        penalties_column.append(penalty)
+    penalties.append(penalties_row)
+    penalties.append(penalties_column)
     return penalties
 
-def allocate_quantity(cost_matrix):
+'''def allocate_quantity(cost_matrix):
     """
     This function allocates the maximum possible quantity to the cell with minimum transportation cost
     in the row or column with the largest penalty
@@ -37,5 +46,5 @@ def allocate_quantity(cost_matrix):
     max_penalty_column = [row[max_penalty_index] for row in cost_matrix]
     min_cost_row_index = max_penalty_row.index(min(max_penalty_row))
     min_cost_column_index = max_penalty_column.index(min(max_penalty_column))
-    return min_cost_row_index, min_cost_column_index
+    return min_cost_row_index, min_cost_column_index'''
 
