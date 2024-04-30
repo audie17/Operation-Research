@@ -1,132 +1,153 @@
 from read_data import read_data_from_file as rd
 from display import display_matrix as disp
+from read_data import read_data_and_matrix as rm
+from nord_west import north_west_algorithm as nwa
 
-def find_loop(matrix, loop, i, j, loop_cost):
-    '''this function will find a loop in a matrix and return True if a loop is found and False otherwise'''
-    provisions = matrix['Provisions']
-    orders = matrix['Orders']
-
-    for k in range(len(provisions)):
-        if k != i and matrix['Costs'][k][j] != 0:
-            if (k, j) in loop:
-                loop.append((k, j))
-                return True
-            elif (k, j) not in loop:
-                loop.append((k, j))
-                loop_cost += matrix['Costs'][k][j]
-                return find_loop(matrix, loop, k, j, loop_cost)
+def find_cycle(basic_variables, deltas):
+    '''this function is used to find the cycle in the graph'''
+    #initialize the cycle
+    cycle = []
     
-    for k in range(len(orders)):
-        if k != j and matrix['Costs'][i][k] != 0:
-            if (i, k) in loop:
-                loop.append((i, k))
-                return True
-            elif (i, k) not in loop:
-                loop.append((i, k))
-                loop_cost += matrix['Costs'][i][k]
-                return find_loop(matrix, loop, i, k, loop_cost)
+    #initialize the visited nodes
+    visited = dict()
     
-    return False
-
-def stepping_stone(matrix, initial_solution):
-    '''this function will perform the stepping stone method on a matrix and its intial result and will return a graph of the results in the form of a dictionary'''
-    provisions = matrix['Provisions']
-    orders = matrix['Orders']
-    total_provisions = matrix['TotalProvisions']
-    total_orders = matrix['TotalOrders']
-
-    IBDS = 0
-    nb_allocated_cells = 0
-
-    for i in range(len(initial_solution)):
-        for j in range(len(initial_solution[0])):
-            if initial_solution[i][j] != 0:
-                IBDS += initial_solution[i][j] * matrix['Costs'][i][j]
-                nb_allocated_cells += 1
-
-    print("Initial Basic Feasible Solution (IBFS) ={} , using {} cells".format(IBDS, nb_allocated_cells))
-
-    if nb_allocated_cells < len(provisions) + len(orders) - 1: #this if check if the initial solution is degenerate
-        print("Degeneracy condition detected")
-        return
+    #initialize the first node
+    for (i, j) in basic_variables:
+        visited[(i, j)] = False
+    for (i, j) in deltas:
+        visited[(i, j)] = False
     
-    #identify the cells that are un-alocated
-    unallocated_cells = []
-    for i in range(len(provisions)):
-        for j in range(len(orders)):
-            if initial_solution[i][j] == 0:
-                unallocated_cells.append((i, j))
-    nb_unallocated_cells = len(unallocated_cells)
-
-    #calculate potential idenx for each unallocated cell
-    potential_indexes = []
-    for i, j in unallocated_cells:
-        potential_indexes.append((i, j, matrix['Costs'][i][j] - matrix['Potentials'][i] - matrix['Potentials'][j]))
+    #find the first node
+    for (i, j) in basic_variables:
+        if basic_variables[(i, j)] != 0:
+            cycle.append((i, j))
+            visited[(i, j)] = True
+            break
     
-    #sort the potential indexes
-    potential_indexes.sort(key=lambda x: x[2], reverse=True)
-    print("Potential indexes: ", potential_indexes)
-
-    #initialize the graph
-    graph = {}
-    for i in range(len(provisions)):
-        graph[i] = {}
-        for j in range(len(orders)):
-            graph[i][j] = 0
-
-    #initialize the loop
-    loop = []
-    loop_found = False
-    loop_cost = 0
-    while not loop_found:
-        #initialize the loop
-        loop = []
-        loop_cost = 0
-
-        #start the loop
-        for i, j, _ in potential_indexes:
-            loop = [(i, j)]
-            loop_cost = matrix['Costs'][i][j]
-            if find_loop(matrix, loop, i, j, loop_cost):
-                loop_found = True
+    #find the cycle
+    while True:
+        (x, y) = cycle[-1]
+        for (i, j) in basic_variables:
+            if (i, j) != (x, y) and basic_variables[(i, j)] != 0 and not visited[(i, j)]:
+                cycle.append((i, j))
+                visited[(i, j)] = True
                 break
+        else:
+            for (i, j) in deltas:
+                if (i, j) != (x, y) and deltas[(i, j)] != 0 and not visited[(i, j)]:
+                    cycle.append((i, j))
+                    visited[(i, j)] = True
+                    break
+            else:
+                break
+    
+    return cycle
 
-    print("Loop found: ", loop)
-    print("Loop cost: ", loop_cost)
+def stepping_stone(matrix, initial_solution, cost_matrix):
+    '''this function is used to find the optimal solution of the transportation problem using the stepping stone method'''
+    provisions = matrix['Provisions']
+    orders = matrix['Orders']
 
-    #calculate the minimum quantity in the loop
-    min_quantity = float('inf')
-    for i in range(0, len(loop), 2):
-        min_quantity = min(min_quantity, initial_solution[loop[i][0]][loop[i][1]])
-
-    print("Minimum quantity in the loop: ", min_quantity)
-
-    #update the graph
-    for i in range(0, len(loop), 2):
-        graph[loop[i][0]][loop[i][1]] = initial_solution[loop[i][0]][loop[i][1]] + min_quantity
-        graph[loop[i+1][0]][loop[i+1][1]] = initial_solution[loop[i+1][0]][loop[i+1][1]] - min_quantity
-
-    print("Graph: ", graph)
-
-    #update the potentials
+    #initialize the first graph
+    basic_variables = dict()
     for i in range(len(provisions)):
         for j in range(len(orders)):
-            if (i, j) in loop:
-                matrix['Potentials'][i] += min_quantity
-                matrix['Potentials'][j] -= min_quantity
+            if initial_solution[i][j] != 0:
+                basic_variables[(i, j)] = initial_solution[i][j]
+    
+    #check if the solution is degenerate
+    if len(basic_variables) != len(provisions) + len(orders) - 1:
+        print("The solution is degenerate.")
+        #make the solution non-degenerate
+        for i in range(len(provisions)):
+            for j in range(len(orders)):
+                if (i, j) not in basic_variables:
+                    basic_variables[(i, j)] = 0
+                    break
 
-    print("Potentials: ", matrix['Potentials'])
+    #initialize the potentials
+    potentials = dict()
+    potentials[0] = 0
+    
+    #initialize the loop variables
+    loop = True
+    iteration = 0
+    while loop and iteration>100:
+        iteration += 1
+        print("\nIteration ", iteration)
+        
+        #initialize the deltas
+        deltas = dict()
+        
+        #calculate the deltas
+        for i in range(len(provisions)):
+            for j in range(len(orders)):
+                if (i, j) not in basic_variables:
+                    deltas[(i, j)] = cost_matrix[i][j] - (potentials[i] + potentials[len(provisions) + j])
+        
+        #display the deltas
+        print("Deltas: ", deltas)
+        
+        #find the cycle
+        cycle = find_cycle(basic_variables, deltas)
+        
+        #display the cycle
+        print("Cycle: ", cycle)
+        
+        #find the minimum quantity in the cycle
+        min_quantity = None
+        for i in range(len(cycle)):
+            (x, y) = cycle[i]
+            if min_quantity == None or basic_variables[(x, y)] < min_quantity:
+                min_quantity = basic_variables[(x, y)]
+        
+        #display the minimum quantity
+        print("Minimum Quantity: ", min_quantity)
+        
+        #update the basic variables
+        for i in range(len(cycle)):
+            (x, y) = cycle[i]
+            if i % 2 == 0:
+                basic_variables[(x, y)] += min_quantity
+            else:
+                basic_variables[(x, y)] -= min_quantity
+        
+        #display the basic variables
+        print("Basic Variables: ", basic_variables)
+        
+        #check if the loop should continue
+        loop = False
+        for i in range(len(provisions)):
+            for j in range(len(orders)):
+                if (i, j) in basic_variables and basic_variables[(i, j)] != 0:
+                    loop = True
+                    break
 
-    return graph
+    #calculate the total cost
+    total_cost = 0
+    for (i, j) in basic_variables:
+        total_cost += basic_variables[(i, j)] * cost_matrix[i][j]
+    
+    #display the total cost
+    print("Total Cost: ", total_cost)
+
+    return basic_variables
+
+def disp_graph(dic):
+    '''this function is used to display the graph'''
+    for i in dic:
+        print(i, dic[i])
+
 
 if __name__ == "__main__":
-    test_nb = int(input("\nWelcome ! \nEnter the Transportation problem number (1 to 12):\n "))
-    if 1 <= test_nb <= 12:
-        print("\n Transportation Problem "+str(test_nb)+":\n")
-        data_matrice = rd(str(test_nb)+'.txt')
-        cost_matrix = disp(str(test_nb))
-        initial_solution = [[0] * len(data_matrice['Orders']) for _ in range(len(data_matrice['Provisions']))]
-        result = stepping_stone(data_matrice, initial_solution)
-        print("Result: ", result)
+    for i in range(1, 13):
+        print("\n Transportation Problem "+str(i)+":\n")
+        data_matrice = rd(str(i)+'.txt')
+        cost_matrix = rm(str(i)+'.txt')
+        disp(str(i))
+        initial_solution = nwa(data_matrice)
+        result = stepping_stone(data_matrice, initial_solution, cost_matrix)
+        if result!= None:
+            disp_graph(result)
     else:
         print("\nWrong value, it needs to be between 1 and 12.")
