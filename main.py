@@ -38,15 +38,13 @@ def main():
     """
     Main function
     """
-    print (" Welcome")
-    
-    disp.display_trans_proposals('1')
-    value= nw.north_west_algorithm(rd.read_data_from_file('1.txt'))
-    print("Balas-Hammer Algorithm")
-    print(bh.find_cost_matrix(rd.read_data_from_file('1.txt')))
-    print(bh.compute_penalties(bh.find_cost_matrix(rd.read_data_from_file('1.txt'))))
-    print(tc.calculate_total_cost(value,rd.read_data_from_file('1.txt')))
-
-
+    test_nb = int(input("\nWelcome ! \nEnter the Transportation problem number (1 to 12):\n "))
+    if 1 <= test_nb <= 12:
+        print("\n Transportation Problem "+str(test_nb)+":\n")
+        disp.display_matrix(str(test_nb))
+    else:
+        print("\nWrong value, it needs to be between 1 and 12.")
+        
+        
 if __name__ == "__main__":
     main()

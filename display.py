@@ -4,14 +4,14 @@
 
 
 from read_data import read_data_from_file as rd
-from nord_west import north_west_algorithm as nw
 
 
-def display_trans_proposals(nb):
+def display_matrix(nb):
     """
     Displays the cost matrix along with provisions and orders.
     """
-    data_matrice= rd(nb+".txt")
+    data_matrice = rd(nb + '.txt')
+    cost_matrix = rm(nb + '.txt')
     # Retrieve the number of provisions and orders from the data lengths
     num_provisions = len(data_matrice["Provisions"])
     num_orders = len(data_matrice["Orders"])
@@ -32,11 +32,3 @@ def display_trans_proposals(nb):
     orders_row = ["Orders"] + data_matrice["TotalOrders"]
     print('\t'.join(map(str, orders_row)) + '\n')
 
-def display_north_west(matrix):
-    """
-    Displays the result of the North-West algorithm.
-    """
-    result = nw(matrix)
-    print("North-West Algorithm")
-    print(result)
-    print("\n")
