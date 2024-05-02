@@ -32,6 +32,7 @@ import display as disp
 import nord_west as nw
 import read_data as rd
 import balas_hammer as bh
+import total_cost as tc
 
 def main():
     """
@@ -39,12 +40,13 @@ def main():
     """
     print (" Welcome")
     
-    print(rd.read_data_from_file('10.txt'))
-    disp.display_trans_proposals('10')
+    disp.display_trans_proposals('1')
+    value= nw.north_west_algorithm(rd.read_data_from_file('1.txt'))
     print("Balas-Hammer Algorithm")
-    print(bh.find_cost_matrix(rd.read_data_from_file('10.txt')))
-    print(bh.compute_penalties(bh.find_cost_matrix(rd.read_data_from_file('10.txt'))))
-    print(bh.allocate_quantity(rd.read_data_from_file('10.txt'),bh.find_cost_matrix(rd.read_data_from_file('10.txt'))))
+    print(bh.find_cost_matrix(rd.read_data_from_file('1.txt')))
+    print(bh.compute_penalties(bh.find_cost_matrix(rd.read_data_from_file('1.txt'))))
+    print(tc.calculate_total_cost(value,rd.read_data_from_file('1.txt')))
+
 
 if __name__ == "__main__":
     main()

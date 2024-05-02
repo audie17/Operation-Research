@@ -33,7 +33,7 @@ def compute_penalties(cost_matrix):
 
     return [penalties_row, penalties_column]
 
-
+'''
 def allocate_quantity(data, cost_matrix):
     """
     This function allocates the maximum possible quantity to the cell with minimum transportation cost
@@ -45,40 +45,49 @@ def allocate_quantity(data, cost_matrix):
     total_orders = data["TotalOrders"]
     result = [[0] * num_orders for _ in range(num_provisions)]
 
-    while True:
-        penalties = compute_penalties(cost_matrix)
-        penalties_provisions = penalties[0]
-        penalties_orders = penalties[1]
+    penalties = compute_penalties(cost_matrix)
+    penalties_provisions = penalties[0]
+    penalties_orders = penalties[1] 
+    max_penalty_row = max(penalties_provisions)
+    max_penalty_column = max(penalties_orders)
+    
+    print(penalties_provisions)
+    print(penalties_orders)
+    print(max_penalty_row)
+    print(max_penalty_column)
+    # Find the row or column with the largest penalty
+    while penalties_provisions != [] and penalties_orders != []: 
 
-        if not penalties_provisions or not penalties_orders:
-            break
+        if max_penalty_row > max_penalty_column:
 
-        max_penalty_row = max(penalties_provisions)
-        max_penalty_column = max(penalties_orders)
-
-        if max_penalty_row >= max_penalty_column:
-            max_penalty_index = penalties_provisions.index(max_penalty_row)
-            min_cost = min(cost_matrix[max_penalty_index])
-            for j in range(num_orders):
+            for j in range(num_orders):  # Changed from num_provisions to num_orders
+                max_penalty_index = penalties_provisions.index(max_penalty_row)
+                min_cost = min([cost_matrix[row][max_penalty_index] for row in range(num_provisions)])  # Calculate the minimum cost correctly
                 if cost_matrix[max_penalty_index][j] == min_cost:
-                    quantity = min(total_provisions[max_penalty_index], total_orders[j])
-                    result[max_penalty_index][j] = quantity
-                    total_provisions[max_penalty_index] -= quantity
-                    total_orders[j] -= quantity
-
-            # Remove the processed row penalty
+                    result[max_penalty_index][j] = min(total_provisions[max_penalty_index], total_orders[j])
+                    total_provisions[max_penalty_index] -= result[max_penalty_index][j]
+                    total_orders[j] -= result[max_penalty_index][j]
+                    min_cost = float('inf')  # Reset the minimum cost
             penalties_provisions.pop(max_penalty_index)
+            print(penalties_provisions)
+            if penalties_provisions != []:
+                max_penalty_row = max(penalties_provisions)  # Recalculate max_penalty_row
+                print(max_penalty_row)
+
         else:
-            max_penalty_index = penalties_orders.index(max_penalty_column)
-            min_cost = min([cost_matrix[row][max_penalty_index] for row in range(num_provisions)])
-            for i in range(num_provisions):
+            for i in range(num_provisions):  # Changed from num_orders to num_provisions
+                max_penalty_index = penalties_orders.index(max_penalty_column)
+                min_cost = min([cost_matrix[row][max_penalty_index] for row in range(num_provisions)])  # Calculate the minimum cost correctly
+                print(min_cost)
                 if cost_matrix[i][max_penalty_index] == min_cost:
-                    quantity = min(total_provisions[i], total_orders[max_penalty_index])
-                    result[i][max_penalty_index] = quantity
-                    total_provisions[i] -= quantity
-                    total_orders[max_penalty_index] -= quantity
-
-            # Remove the processed column penalty
+                    result[i][max_penalty_index] = min(total_provisions[i], total_orders[max_penalty_index])
+                    total_provisions[i] -= result[i][max_penalty_index]
+                    total_orders[max_penalty_index] -= result[i][max_penalty_index]
+                    min_cost = float('inf')  # Reset the minimum cost
             penalties_orders.pop(max_penalty_index)
+            print(penalties_orders)
+            if penalties_orders != []:
+                max_penalty_column = max(penalties_orders)  # Recalculate max_penalty_column
+                print(max_penalty_column)
 
-    return result
+    return result'''
