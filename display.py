@@ -4,7 +4,7 @@
 
 
 from read_data import read_data_from_file as rd
-from read_data import read_data_and_matrix as rm
+
 
 def display_matrix(nb):
     """
@@ -31,11 +31,4 @@ def display_matrix(nb):
     # Print the orders row
     orders_row = ["Orders"] + data_matrice["TotalOrders"]
     print('\t'.join(map(str, orders_row)) + '\n')
-    
-    
-    # Display the cost matrix
-    print("Cost Matrix:\n")
-    for i in range(len(cost_matrix)):
-        print("\t".join(map(str, cost_matrix[i])))
 
-        

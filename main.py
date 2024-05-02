@@ -30,6 +30,9 @@
         """
 import display as disp
 import nord_west as nw
+import read_data as rd
+import balas_hammer as bh
+import total_cost as tc
 
 def main():
     """
@@ -43,11 +46,5 @@ def main():
         print("\nWrong value, it needs to be between 1 and 12.")
         
         
-    
-    
-    
-    
-    
-''' Do not supp !! '''    
 if __name__ == "__main__":
     main()
