@@ -18,7 +18,6 @@ def compute_penalties(cost_matrix):
     """
     This function computes the penalties of a given cost matrix
     """
-    penalties = []
     penalties_row = []
     penalties_column = []
     for i in range(len(cost_matrix)):
@@ -31,20 +30,55 @@ def compute_penalties(cost_matrix):
         sorted_column = sorted(column)
         penalty = sorted_column[1] - sorted_column[0]
         penalties_column.append(penalty)
-    penalties.append(penalties_row)
-    penalties.append(penalties_column)
-    return penalties
 
-'''def allocate_quantity(cost_matrix):
+    return [penalties_row, penalties_column]
+
+
+def allocate_quantity(data, cost_matrix):
     """
     This function allocates the maximum possible quantity to the cell with minimum transportation cost
-    in the row or column with the largest penalty
+    in the row or column with the largest penalty.
     """
-    penalties = compute_penalties(cost_matrix)
-    max_penalty_index = penalties.index(max(penalties))
-    max_penalty_row = cost_matrix[max_penalty_index]
-    max_penalty_column = [row[max_penalty_index] for row in cost_matrix]
-    min_cost_row_index = max_penalty_row.index(min(max_penalty_row))
-    min_cost_column_index = max_penalty_column.index(min(max_penalty_column))
-    return min_cost_row_index, min_cost_column_index'''
+    num_provisions = len(data["Provisions"])
+    num_orders = len(data["Orders"])
+    total_provisions = data["TotalProvisions"]
+    total_orders = data["TotalOrders"]
+    result = [[0] * num_orders for _ in range(num_provisions)]
 
+    while True:
+        penalties = compute_penalties(cost_matrix)
+        penalties_provisions = penalties[0]
+        penalties_orders = penalties[1]
+
+        if not penalties_provisions or not penalties_orders:
+            break
+
+        max_penalty_row = max(penalties_provisions)
+        max_penalty_column = max(penalties_orders)
+
+        if max_penalty_row >= max_penalty_column:
+            max_penalty_index = penalties_provisions.index(max_penalty_row)
+            min_cost = min(cost_matrix[max_penalty_index])
+            for j in range(num_orders):
+                if cost_matrix[max_penalty_index][j] == min_cost:
+                    quantity = min(total_provisions[max_penalty_index], total_orders[j])
+                    result[max_penalty_index][j] = quantity
+                    total_provisions[max_penalty_index] -= quantity
+                    total_orders[j] -= quantity
+
+            # Remove the processed row penalty
+            penalties_provisions.pop(max_penalty_index)
+        else:
+            max_penalty_index = penalties_orders.index(max_penalty_column)
+            min_cost = min([cost_matrix[row][max_penalty_index] for row in range(num_provisions)])
+            for i in range(num_provisions):
+                if cost_matrix[i][max_penalty_index] == min_cost:
+                    quantity = min(total_provisions[i], total_orders[max_penalty_index])
+                    result[i][max_penalty_index] = quantity
+                    total_provisions[i] -= quantity
+                    total_orders[max_penalty_index] -= quantity
+
+            # Remove the processed column penalty
+            penalties_orders.pop(max_penalty_index)
+
+    return result

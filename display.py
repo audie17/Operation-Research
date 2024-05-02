@@ -5,7 +5,7 @@
 
 from read_data import read_data_from_file as rd
 from nord_west import north_west_algorithm as nw
-from nord_west import north_west_algorithm as nw
+
 
 def display_trans_proposals(nb):
     """
@@ -39,3 +39,4 @@ def display_north_west(matrix):
     result = nw(matrix)
     print("North-West Algorithm")
     print(result)
+    print("\n")

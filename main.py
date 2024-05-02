@@ -41,11 +41,10 @@ def main():
     
     print(rd.read_data_from_file('10.txt'))
     disp.display_trans_proposals('10')
-    disp.display_north_west(rd.read_data_from_file('10.txt'))
     print("Balas-Hammer Algorithm")
     print(bh.find_cost_matrix(rd.read_data_from_file('10.txt')))
     print(bh.compute_penalties(bh.find_cost_matrix(rd.read_data_from_file('10.txt'))))
-    #print(bh.allocate_quantity(bh.find_cost_matrix(rd.read_data_from_file('10.txt'))))
+    print(bh.allocate_quantity(rd.read_data_from_file('10.txt'),bh.find_cost_matrix(rd.read_data_from_file('10.txt'))))
 
 if __name__ == "__main__":
     main()
