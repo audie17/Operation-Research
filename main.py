@@ -33,7 +33,6 @@ import nord_west as nw
 import read_data as rd
 import balas_hammer as bh
 import total_cost as tc
-import potential_cost as pc
 
 def main():
     """
