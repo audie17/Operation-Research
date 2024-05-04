@@ -27,12 +27,12 @@ def read_data_from_file(file_name):
 
         # Read and store total orders data
         total_orders_data = list(map(int, file.readline().split()))
-
+        data["TotalOrders"] = total_orders_data
         # Store orders data
         for i in range(num_orders):
             data["Orders"]["C"+str(i+1)] = orders_data[i] # Exclude the last row
 
-        data["TotalOrders"] = total_orders_data
+        
 
     return data
 

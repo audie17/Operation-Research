@@ -33,6 +33,7 @@ import nord_west as nw
 import read_data as rd
 import balas_hammer as bh
 import total_cost as tc
+import potential_cost as pc
 
 def main():
     """
@@ -40,8 +41,17 @@ def main():
     """
     test_nb = int(input("\nWelcome ! \nEnter the Transportation problem number (1 to 12):\n "))
     if 1 <= test_nb <= 12:
+        file_name = str(test_nb) +".txt"
+        
         print("\n Transportation Problem "+str(test_nb)+":\n")
         disp.display_matrix(str(test_nb))
+        matrix = rd.read_data_from_file(file_name)
+
+        print("Cost matrix: \n")
+        cost_matrix = disp.display_cost_matrix(str(test_nb))  # Make sure to have this function correctly implemented in display.py
+        
+        print("\nPotentiel cost table :\n")
+        
     else:
         print("\nWrong value, it needs to be between 1 and 12.")
         
