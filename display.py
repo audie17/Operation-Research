@@ -30,30 +30,7 @@ def display_matrix(nb):
     # Print the orders row
     orders_row = ["Orders"] + data_matrice["TotalOrders"]
     print('\t'.join(map(str, orders_row)) + '\n')
-    
-# Display the matrix with given data
-def display_matrix_from_data(data_matrice):
-    
-    # Retrieve the number of provisions and orders from the data lengths
-    num_provisions = len(data_matrice["Provisions"])
-    num_orders = len(data_matrice["Orders"])
-
-    # Create header row with customer labels and 'Provisions' column
-    header_row = [' '] + ["C" + str(i+1) for i in range(num_orders)] + ["Provisions"]
-    print('\t'.join(header_row))
-    
-    # Print each provision row
-    for i in range(num_provisions):
-        provision_label = "P" + str(i+1)
-        provision_costs = data_matrice["Provisions"][provision_label]
-        provision_total = data_matrice["TotalProvisions"][i]
-        row = [provision_label] + ['\033[0;34m' + str(cost) + '\033[0m' for cost in provision_costs] + [provision_total]
-        print('\t'.join(map(str, row)))
-
-    # Print the orders row
-    orders_row = ["Orders"] + data_matrice["TotalOrders"]
-    print('\t'.join(map(str, orders_row)) + '\n')
-
+  
 # Cost Matrix
 
 def display_cost_matrix(file_name):
@@ -79,3 +56,10 @@ def display_cost_matrix(file_name):
 
     return cost_matrix  # Ensure this line exists and properly returns the matrix
 
+
+# Display nordWest
+
+def display_transportation_proposal(transportation_proposal):
+    
+    for row in transportation_proposal:
+        print(" | ".join(map(str, row)))

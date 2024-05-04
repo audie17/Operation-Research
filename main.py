@@ -43,13 +43,21 @@ def main():
         file_name = str(test_nb) +".txt"
         
         print("\n Transportation Problem "+str(test_nb)+":\n")
+        
         disp.display_matrix(str(test_nb))
         matrix = rd.read_data_from_file(file_name)
-
-        print("Cost matrix: \n")
+        
+        print("\nCost matrix: \n")
         cost_matrix = disp.display_cost_matrix(str(test_nb))  # Make sure to have this function correctly implemented in display.py
         
-        print("\nPotentiel cost table :\n")
+
+        print("\nTransportation proposal:\n")
+        result = nw.north_west_algorithm(matrix)
+        disp.display_transportation_proposal(result)
+        
+        print("\nPotentiel costs table :\n")
+        
+        print("\nMarginal costs table :\n")
         
     else:
         print("\nWrong value, it needs to be between 1 and 12.")
