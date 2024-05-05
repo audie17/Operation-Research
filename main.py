@@ -33,6 +33,7 @@ import nord_west as nw
 import read_data as rd
 import balas_hammer as bh
 import total_cost as tc
+import marginal_cost as marg
 
 def main():
     """
@@ -51,13 +52,18 @@ def main():
         cost_matrix = disp.display_cost_matrix(str(test_nb))  # Make sure to have this function correctly implemented in display.py
         
 
-        print("\nTransportation proposal:\n")
+        print("\nTransportation proposal:\n",
+              " - North-West Corner :\n")
+        
         result = nw.north_west_algorithm(matrix)
         disp.display_transportation_proposal(result)
+        print("\n - Balas-Hammer ")
         
         print("\nPotentiel costs table :\n")
         
         print("\nMarginal costs table :\n")
+        marginal_costs_provisions, marginal_costs_orders = marg.calculate_marginal_costs(cost_matrix)
+        disp.display_marginal_costs(marginal_costs_provisions, marginal_costs_orders)
         
     else:
         print("\nWrong value, it needs to be between 1 and 12.")
