@@ -3,48 +3,134 @@ from display import display_matrix as disp
 from read_data import read_data_and_matrix as rm
 from nord_west import north_west_algorithm as nwa
 from math import inf
+from typing import Dict, List, Tuple
 
-def into_the_graph(matrix, initial_solution):
+def into_the_graph(matrix: Dict[str, List[int]], initial_solution: List[List[int]]) -> Dict[Tuple[int, str], List[int]]:
     '''this function transforms the initial solution into a graph'''
     provisions = matrix['Provisions']
     orders = matrix['Orders']
     n = len(provisions)
     m = len(orders)
     
-    #transform the initial solution into a non-orietended graph
+    #transform the initial solution into a non-oriented graph
     graph_solution = {}
     for i in range(n):
-        graph_solution[i] = []
+        if graph_solution.get((i,'p')) == None:
+            graph_solution[(i,'p')] = []
         for j in range(m):
             if initial_solution[i][j] != 0:
-                graph_solution[j] = []
-                graph_solution[i].append(j)
-                graph_solution[j].append(i)
-    #print the graph
-    for i in range(n):
-        print(i, graph_solution[i])
-    return graph_solution
-    
-def find_E_values(cost_matrix, new_solution):
-    '''this functions finds the potential values for the sources and destinations in the graph'''
-    #initialize the variables
-    num_sources = len(cost_matrix)
-    num_destinations = len(cost_matrix[0])
+                if graph_solution.get((j,'o')) == None:
+                    graph_solution[(j,'o')] = []
+                graph_solution[(i,'p')].append((j,'o'))
+                graph_solution[(j,'o')].append((i,'p'))
 
-    #initialize the source and destination potentials
-    source_E = [-inf]*num_sources
-    destination_E = [-inf]*num_destinations
+    return graph_solution
+
+def add_edge(matrix, initial_solution, graph_solution):
+    '''this function adds and edge with the smallest cost to the graph representation of the solution among the vertices that already exist in the solution,
+    returns the number of edges and vertices in the solution after adding the edge'''
+    provisions = matrix['Provisions']
+    orders = matrix['Orders']
+    n = len(provisions)
+    m = len(orders)
+
+    # Initialize the variables
+    min_cost = float('inf')
+    min_cost_cell = None
+    nb_vertices = 0
+    nb_edges = 0
+
+    # Find the cell with the smallest cost among the already existing vertices
+    for i in range(n):
+        for j in range(m):
+            if initial_solution[i][j] == 0 and (i,'p') in graph_solution.keys() and (j,'o') in graph_solution.keys():
+                if min_cost > initial_solution[i][j]:
+                    min_cost = initial_solution[i][j]
+                    min_cost_cell = (i,j)
+
+    # Add the cell with the smallest cost to the solution
+    if min_cost_cell != None:
+        graph_solution[(min_cost_cell[0],'p')].append((min_cost_cell[1],'o'))
+        graph_solution[(min_cost_cell[1],'o')].append((min_cost_cell[0],'p'))
+        visited_vertices = []
+        visited_edges = []
+        for key,value in graph_solution.items():
+            if key not in visited_vertices:
+                visited_vertices.append(key)
+                nb_vertices += 1
+            for v in value:
+                if (key,v) not in visited_edges:
+                    visited_edges.append((key,v))
+                    nb_edges += 1
+
+    return nb_edges/2, nb_vertices, graph_solution
+
+def remove_edge(matrix, initial_solution, graph_solution):
+    '''
+    Removes an edge with the highest cost from the graph representation of the solution.
+
+    Args:
+        matrix (list): The matrix representing the problem.
+        initial_solution (dict): The initial solution.
+        graph_solution (dict): The graph representation of the solution.
+
+    Returns:
+        tuple: A tuple containing the number of edges and vertices in the solution after removing the edge.
+
+    '''
+    # Initialize the variables
+    max_cost = -float('inf')
+    max_cost_cell = None
+    nb_vertices = 0
+    nb_edges = 0
+
+    # Find the cell with the highest cost among the already existing edges
+    for key,value in graph_solution.items():
+        for v in value:
+            if initial_solution[key[0]][v[0]] != 0 and initial_solution[key[0]][v[0]] > max_cost:
+                max_cost = initial_solution[key[0]][v[0]]
+                max_cost_cell = (key[0],v[0])
+
+    # Remove the cell with the highest cost from the solution
+    if max_cost_cell != None:
+        graph_solution[(max_cost_cell[0],'p')].remove((max_cost_cell[1],'o'))
+        graph_solution[(max_cost_cell[1],'o')].remove((max_cost_cell[0],'p'))
+        visited_vertices = []
+        visited_edges = []
+        for key,value in graph_solution.items():
+            if key not in visited_vertices:
+                visited_vertices.append(key)
+                nb_vertices += 1
+            for v in value:
+                if (key,v) not in visited_edges:
+                    visited_edges.append((key,v))
+                    nb_edges += 1
+
+    return nb_edges/2, nb_vertices, graph_solution
+
+def find_E_values(cost_matrix, graph_solution):
+    '''this function finds the potentials for the source and destination nodes using the cost matrix and the graph representation of the solution'''
+    # Initialize the variables
+    n = len(cost_matrix)
+    m = len(cost_matrix[0])
+    source_E = [None]*n
+    destination_E = [None]*m
     source_E[0] = 0
 
-    #find the potentials
-    for i in range(num_sources):
-        for j in range(num_destinations):
-            if new_solution[i][j] != 0:
-                if source_E[i]==-inf and destination_E[j]!=None:
-                    source_E[i] = cost_matrix[i][j] - destination_E[j]
-                if destination_E[j]==-inf and source_E[i]!=None:
-                    destination_E[j] = cost_matrix[i][j] + source_E[i]
-    
+    # Find the potentials for the source nodes
+    for i in range(n):
+        for j in range(m):
+            if (j,'o') in graph_solution[(i,'p')] and (i,'p') in graph_solution[(j,'o')]:
+                if source_E[i] != None and destination_E[j] == None:
+                    destination_E[j] = cost_matrix[i][j] - source_E[i]
+                elif source_E[i] == -inf and destination_E[j] != -inf:
+                    source_E[i] = cost_matrix[i][j] + destination_E[j]
+            elif (j,'o') not in graph_solution[(i,'p')] and (i,'p') not in graph_solution[(j,'o')]:
+                if source_E[i] != None and destination_E[j] == None:
+                    destination_E[j] = 0
+                elif source_E[i] == None and destination_E[j] != None:
+                    source_E[i] = 0
+
     return source_E, destination_E
 
 def find_marginal_costs(cost_matrix, source_E, destination_E):
@@ -62,115 +148,61 @@ def find_marginal_costs(cost_matrix, source_E, destination_E):
     
     return marginal_costs
 
-def degenerate_solution(matrix, initial_solution, graph_solution):
-    '''this function adds a cell with the smallest cost to the solution if it is degenerate'''
-    # Initialize the variables
-    provisions = matrix['Provisions']
-    orders = matrix['Orders']
-    n = len(provisions)
-    m = len(orders)
+def find_cycle(graph_solution, cost_matrix):
+    '''this function finds the cycle with the smallest cost in the graph representation of the solution'''
+    #initialize the variables
+    visited = []
+    cycle = []
     min_cost = float('inf')
-    min_cost_cell = None
 
-    # Go through all the non-allocated cells
-    for i in range(n):
-        for j in range(m):
-            if initial_solution[i][j] == 0:
-                # Calculate the cost of adding this cell to the solution
-                cost = cost_matrix[i][j] - max_cost_in_loop(graph_solution, i, j)
-                # If this cell has the smallest cost, update min_cost and min_cost_cell
-                if cost < min_cost:
-                    min_cost = cost
-                    min_cost_cell = (i, j)
+    #find the cycle with the smallest cost
+    for key,value in graph_solution.items():
+        for v in value:
+            
+            if (key,v) not in visited:
+                visited.append((key,v))
+                visited.append((v,key))
+                
+                if cost_matrix[key[0]][v[0]] < min_cost:
+                    min_cost = cost_matrix[key[0]][v[0]]
+                    cycle = [key,v]
+                    current = v
+                    
+                    if cycle[0][0] == cycle[1][0]:
+                        return cycle
+                    
+                    iteration = 0
+                    while current != cycle[0] and iteration < 10000:
+                        print("we are in the while loop, iteration: ", iteration)
+                        print("current: ", current)
+                        print("cycle[0]: ", cycle[0])
+                        print("cycle[1]: ", cycle[1])
+                        print("cycle: ", cycle)
+                        iteration += 1
 
-    # Add the cell with the smallest cost to the solution
-    if min_cost_cell is not None:
-        i, j = min_cost_cell
-        initial_solution[i][j] = 0  # Allocate a fictive quantity of zero
-        graph_solution[i].append(j)
-        graph_solution[j].append(i)
+                        for v in graph_solution[current]:
+                            if (current,v) not in visited:
+                                visited.append((current,v))
+                                visited.append((v,current))
+                                cycle.append(v)
+                                current = v
+                                break
 
-    # Update the number of vertices and edges
-    nb_vertices = len(graph_solution)
-    nb_edges = sum(len(graph_solution[i]) for i in range(nb_vertices))
+    return cycle
 
-    return nb_edges, nb_vertices, initial_solution
-
-def max_cost_in_loop(graph_solution, i, j):
-    '''this function finds the maximum cost in the loop containing the cell (i, j)'''
-    # Initialize the variables
-    max_cost = 0
-    current_vertex = i
-    current_edge = j
-
-    # Find the loop
-    while True:
-        next_vertex = None
-        for vertex in graph_solution[current_edge]:
-            if vertex != current_vertex:
-                next_vertex = vertex
-                break
-        if next_vertex == i or next_vertex is None:
-            break
-        cost = cost_matrix[current_edge][next_vertex]
-        if cost > max_cost:
-            max_cost = cost
-        current_vertex = current_edge
-        current_edge = next_vertex
-
-    return max_cost
-
-def find_loop(graph_solution, i, j):
-    '''this function finds the loop containing the cell (i, j)'''
-    # Initialize the variables
-    loop = [(i, j)]
-    current_vertex = i
-    current_edge = j
-
-    # Find the loop
-    while True:
-        next_vertex = None
-        for vertex in graph_solution[current_edge]:
-            if vertex != current_vertex:
-                next_vertex = vertex
-                break
-        if next_vertex == i:
-            break
-        loop.append((current_edge, next_vertex))
-        current_vertex = current_edge
-        current_edge = next_vertex
-
-    return loop
-
-def update_solution(new_solution, marginal_costs, graph_solution):
-    '''this function updates the solution by finding the loop with the smallest cost'''
-    # Initialize the variables
-    n = len(new_solution)
-    m = len(new_solution[0])
-    min_cost = float('inf')
-    min_cost_loop = None
-
-    # Go through all the cells
-    for i in range(n):
-        for j in range(m):
-            if new_solution[i][j] == 0:
-                # Find the loop containing this cell
-                loop = find_loop(graph_solution, i, j)
-                # Calculate the cost of this loop
-                cost = sum(marginal_costs[u][v] for u, v in loop)
-                # If this loop has the smallest cost, update min_cost and min_cost_loop
-                if cost < min_cost:
-                    min_cost = cost
-                    min_cost_loop = loop
-
-    # Update the solution
-    for u, v in min_cost_loop:
-        new_solution[u][v] = 0 if new_solution[u][v] > 0 else 1
-
-    return new_solution
-
-def stepping_stone(matrix, initial_solution, cost_matrix):
-    '''this function implements the stepping stone method to find the optimal solution, returns the optimal solution under the form of a matrix'''
+def stepping_stone(matrix, initial_solution, cost_matrix, depth=0):
+    '''
+    This function implements the stepping stone method to find the optimal solution.
+    
+    Args:
+        matrix (dict): A dictionary containing the provisions and orders.
+        initial_solution (list): The initial solution under the form of a matrix.
+        cost_matrix (list): The cost matrix.
+    
+    Returns:
+        list: The optimal solution under the form of a matrix.
+    '''
+    print("welcome to the stepping stone method, we are at the depth {}, the lower the number, the deeper we are in the recursion\n".format(depth))
     # Initialize the variables
     provisions = matrix['Provisions']
     orders = matrix['Orders']
@@ -183,36 +215,78 @@ def stepping_stone(matrix, initial_solution, cost_matrix):
     #check if the solution is degenerate
     nb_vertices = 0
     nb_edges = 0
-    for i in range(len(graph_solution)):
-        nb_vertices += 1
-        nb_edges += len(graph_solution[i])
+    visited_vertices = []
+    visited_edges = []
+    for key,value in graph_solution.items():
+        if key not in visited_vertices:
+            visited_vertices.append(key)
+            nb_vertices += 1
+        for v in value:
+            if (key,v) not in visited_edges:
+                visited_edges.append((key,v))
+                nb_edges += 1
+    nb_edges = nb_edges/2
+
 
     # Add a cell with the smallest cost to the solution if it is degenerate
     iteration = 0
-    while abs(nb_edges)!=abs(nb_vertices)-1 and iteration < 1000:
-        nb_edges, nb_vertices, new_solution = degenerate_solution(matrix, initial_solution, graph_solution)
+    while abs(nb_edges)!=abs(nb_vertices)-1 and iteration < 10000:
+
+        if abs(nb_edges)>abs(nb_vertices)-1:
+            print("we have to remove an edge")
+            nb_edges, nb_vertices, graph_solution = remove_edge(matrix, initial_solution, graph_solution)
+        elif abs(nb_edges)<abs(nb_vertices)-1:
+            print("we have to add an edge")
+            nb_edges, nb_vertices, graph_solution = add_edge(matrix, initial_solution, graph_solution)
+        else:
+            print("there is an error in the code since the solution is not degenerate")
+            print ("the result of {} - 1 = {}, so is it equal to {}? {}".format(abs(nb_vertices), abs(nb_edges), abs(nb_vertices)-1, abs(nb_edges)==abs(nb_vertices)-1))
+            iteration = inf
+            break
         iteration += 1
     
-    # Initialize the potentials
-    source_E, destination_E = find_E_values(cost_matrix, new_solution)
-    
-    #intialize the marginal costs
+    #find the potentials using the new graph solution
+    source_E, destination_E = find_E_values(cost_matrix, graph_solution)
+
+    #find the marginal costs using the new potentials
     marginal_costs = find_marginal_costs(cost_matrix, source_E, destination_E)
 
-    #check if the solution is optimal
+    #we check if the solution is optimal
     optimal = True
     for i in range(n):
         for j in range(m):
-            if new_solution[i][j] == 0:
+            if initial_solution[i][j] == 0:
                 if marginal_costs[i][j] < 0:
                     optimal = False
                     break
     
-    #if the solution is not optimal, find the loop with the smallest cost
+    #if the solution is not optimal, we find the cycle with the smallest cost
     if not optimal:
-        new_solution = update_solution(new_solution, marginal_costs, graph_solution)
+        print("The solution is not optimal")
+        cycle = find_cycle(graph_solution, cost_matrix)
+        print("Cycle: {} and it's length: {}".format(cycle, len(cycle)))
+        min_cost = float('inf')
+        for i in range(0,len(cycle),2):
+            print("i: {} and i+1: {}".format(i,i+1))
+            if min_cost > cost_matrix[cycle[i][0]][cycle[i+1][0]]:
+                min_cost = cost_matrix[cycle[i][0]][cycle[i+1][0]]
+        print("Min cost: ", min_cost)
+        for i in range(0,len(cycle),2):
+            print("cycle[i][0]: ", cycle[i][0])
+            print("cycle[i+1][0]: ", cycle[i+1][0])
+            if i%2 != 0:
+                initial_solution[cycle[i][0]][cycle[i+1][0]] += min_cost
+            else:
+                initial_solution[cycle[i][0]][cycle[i+1][0]] -= min_cost
+        print("New solution: ", initial_solution)
+        print("here we go again, we are going down\n")
+        initial_solution = stepping_stone(matrix, initial_solution, cost_matrix, depth - 1)
+        print("we are back to the previous depth {}, we are going up".format(depth))
 
-    return new_solution
+    else:
+        print("The solution is optimal, the final depth is: ", depth)
+
+    return initial_solution
 
 if __name__ == "__main__":
     ##for i in range(1, 13):
