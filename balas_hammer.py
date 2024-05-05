@@ -33,61 +33,71 @@ def compute_penalties(cost_matrix):
 
     return [penalties_row, penalties_column]
 
-'''
-def allocate_quantity(data, cost_matrix):
+def select_max_penalty(cost_matrix):
     """
-    This function allocates the maximum possible quantity to the cell with minimum transportation cost
-    in the row or column with the largest penalty.
+    This function selects the row or column with the maximum penalty
     """
-    num_provisions = len(data["Provisions"])
-    num_orders = len(data["Orders"])
-    total_provisions = data["TotalProvisions"]
-    total_orders = data["TotalOrders"]
-    result = [[0] * num_orders for _ in range(num_provisions)]
-
     penalties = compute_penalties(cost_matrix)
-    penalties_provisions = penalties[0]
-    penalties_orders = penalties[1] 
-    max_penalty_row = max(penalties_provisions)
-    max_penalty_column = max(penalties_orders)
+    max_penalty_row = max(penalties[0])
+    max_penalty_column = max(penalties[1])
+
+    if max_penalty_row == 0 and max_penalty_column == 0:
+        return None
+
+    if max_penalty_row >= max_penalty_column:
+        selected_index = ('row', penalties[0].index(max_penalty_row))
+    else:
+        selected_index = ('column', penalties[1].index(max_penalty_column))
+
+    return selected_index
+
+def ballas_hammer(data):
+    orders = data['Orders']
+    provisions = data['Provisions']
+    provisions_list = list(provisions.values())
+    orders_list = list(orders.values())
+    costs = find_cost_matrix(data)
     
-    print(penalties_provisions)
-    print(penalties_orders)
-    print(max_penalty_row)
-    print(max_penalty_column)
-    # Find the row or column with the largest penalty
-    while penalties_provisions != [] and penalties_orders != []: 
+    # Initialize allocated_costs as a list of lists
+    allocated_costs = [[0] * len(orders_list) for _ in range(len(provisions_list))]
 
-        if max_penalty_row > max_penalty_column:
-
-            for j in range(num_orders):  # Changed from num_provisions to num_orders
-                max_penalty_index = penalties_provisions.index(max_penalty_row)
-                min_cost = min([cost_matrix[row][max_penalty_index] for row in range(num_provisions)])  # Calculate the minimum cost correctly
-                if cost_matrix[max_penalty_index][j] == min_cost:
-                    result[max_penalty_index][j] = min(total_provisions[max_penalty_index], total_orders[j])
-                    total_provisions[max_penalty_index] -= result[max_penalty_index][j]
-                    total_orders[j] -= result[max_penalty_index][j]
-                    min_cost = float('inf')  # Reset the minimum cost
-            penalties_provisions.pop(max_penalty_index)
-            print(penalties_provisions)
-            if penalties_provisions != []:
-                max_penalty_row = max(penalties_provisions)  # Recalculate max_penalty_row
-                print(max_penalty_row)
-
+    while not all(all(cell == float('inf') for cell in row) for row in costs):
+        try:
+            selected_index = select_max_penalty(costs)
+        except:
+            break
+        if selected_index is None:
+            # break
+            debug = 0
+        
+        if selected_index[0] == 'row':
+            selected_row = selected_index[1]
+            min_cost = min(costs[selected_row])
+            min_cost_index = costs[selected_row].index(min_cost)
+            max_supply = min(provisions_list[selected_row], orders_list[min_cost_index])
+            allocated_costs[selected_row][min_cost_index] += max_supply  
+            provisions_list[selected_row] -= max_supply
+            orders_list[min_cost_index] -= max_supply
+            costs[selected_row][min_cost_index] = float('inf')  
         else:
-            for i in range(num_provisions):  # Changed from num_orders to num_provisions
-                max_penalty_index = penalties_orders.index(max_penalty_column)
-                min_cost = min([cost_matrix[row][max_penalty_index] for row in range(num_provisions)])  # Calculate the minimum cost correctly
-                print(min_cost)
-                if cost_matrix[i][max_penalty_index] == min_cost:
-                    result[i][max_penalty_index] = min(total_provisions[i], total_orders[max_penalty_index])
-                    total_provisions[i] -= result[i][max_penalty_index]
-                    total_orders[max_penalty_index] -= result[i][max_penalty_index]
-                    min_cost = float('inf')  # Reset the minimum cost
-            penalties_orders.pop(max_penalty_index)
-            print(penalties_orders)
-            if penalties_orders != []:
-                max_penalty_column = max(penalties_orders)  # Recalculate max_penalty_column
-                print(max_penalty_column)
+            selected_col = selected_index[1]
+            col_values = [row[selected_col] for row in costs]
+            min_cost = min(col_values)
+            min_cost_index = col_values.index(min_cost)
+            max_demand = min(provisions_list[min_cost_index], orders_list[selected_col])
+            allocated_costs[min_cost_index][selected_col] += max_demand  
+            provisions_list[min_cost_index] -= max_demand
+            orders_list[selected_col] -= max_demand
+            costs[min_cost_index][selected_col] = float('inf')
 
-    return result'''
+    # Place remaining costs in the last available cells
+    for i in range(len(costs)):
+        for j in range(len(costs[0])):
+            if costs[i][j] != float('inf'):
+                remaining_cost = min(provisions_list[i], orders_list[j])
+                allocated_costs[i][j] += remaining_cost
+                provisions_list[i] -= remaining_cost
+                orders_list[j] -= remaining_cost
+                costs[i][j] = float('inf')
+
+    return allocated_costs
