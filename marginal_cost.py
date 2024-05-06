@@ -30,19 +30,3 @@ def calculate_marginal_costs(cost_matrix):
 
     
 
-
-import unittest
-
-class TestCalculateMarginalCosts(unittest.TestCase):
-        cost_matrix = [
-            [10, 20, 30],
-            [15, 25, 35]
-        ]
-        marginal_costs_provisions, marginal_costs_orders = calculate_marginal_costs(cost_matrix)
-        print(marginal_costs_orders)
-        print(marginal_costs_provisions)
-
-        # Add more test cases here as needed
-
-if __name__ == '__main__':
-    unittest.main()

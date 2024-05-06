@@ -55,11 +55,16 @@ def main():
         print("\nTransportation proposal:\n",
               " - North-West Corner :\n")
         
-        result = nw.north_west_algorithm(matrix)
-        disp.display_transportation_proposal(result)
-        print("\n - Balas-Hammer ")
+        result_nw = nw.north_west_algorithm(matrix)
+        disp.display_transportation_proposal(result_nw)
         
-        print("\nPotentiel costs table :\n")
+        print("\n - Balas-Hammer ")
+        result_balas = bh.balas_hammer(file_name)
+    
+        print(result_nw)
+        print(" - North-West Corner: ", tc.calculate_total_cost(result_nw,matrix))
+        
+        print("\nPotential costs table :\n")
         
         print("\nMarginal costs table :\n")
         marginal_costs_provisions, marginal_costs_orders = marg.calculate_marginal_costs(cost_matrix)
