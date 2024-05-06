@@ -160,15 +160,12 @@ def find_cycle(graph_solution, cost_matrix):
             if (key,v) not in visited:
                 visited.append((key,v))
                 visited.append((v,key))
-                print("key: ", key)
-                print("key[0]: ", key[0])
-                print("v: ", v)
-                print("v[0]: ", v[0])
 
-                if cost_matrix[key[0]][v[0]] < min_cost:
-                    temp_cycle = [key,v]  # use a temporary cycle to keep track of the current cycle
-                    current = v
-                    
+                try:
+                    if cost_matrix[key[0]][v[0]] < min_cost:
+                        temp_cycle = [key,v]  # use a temporary cycle to keep track of the current cycle
+                        current = v
+
                     iteration = 0
                     while current != temp_cycle[0] and iteration < 10000:
                         iteration += 1
@@ -191,6 +188,10 @@ def find_cycle(graph_solution, cost_matrix):
                     if len(temp_cycle) >= 4:
                         cycle = temp_cycle
                         min_cost = cost_matrix[key[0]][v[0]]
+                
+                except IndexError:
+                    cycle = []
+                    
                             
     return cycle
 
@@ -207,8 +208,6 @@ def stepping_stone(matrix, initial_solution, cost_matrix, depth=0):
     Returns:
         list: The optimal solution under the form of a matrix.
     '''
-    print("\n------------------------------------------------------------------------------------------------------------------\n")
-    print("welcome to the stepping stone method, we are at the depth {}, the lower the number, the deeper we are in the recursion\n".format(depth))
     # Initialize the variables
     provisions = matrix['Provisions']
     orders = matrix['Orders']
@@ -220,9 +219,6 @@ def stepping_stone(matrix, initial_solution, cost_matrix, depth=0):
         total_provisions[i] = sum(initial_solution[i])
     for i in range(len(orders)):
         total_orders[i] = sum([initial_solution[j][i] for j in range(len(provisions))])
-
-    print("Total provisions: ", total_provisions)
-    print("Total orders: ", total_orders)
 
     n = len(provisions)
     m = len(orders)
@@ -281,13 +277,12 @@ def stepping_stone(matrix, initial_solution, cost_matrix, depth=0):
                     break
     
     # if the solution is not optimal, we find the cycle with the smallest cost
-    if not optimal and depth > -900:
+    if not optimal and depth > -5:
         max_posssibility = False
         
         print("\nThe solution is not optimal")
         cycle = find_cycle(graph_solution, cost_matrix)
         if len(cycle) == 0:
-            print("The solution is not feasible, there is no cycle in the graph")
             return initial_solution
         print("Cycle: {} and it's length: {}".format(cycle, len(cycle)))
         min_cost = float('inf')
@@ -308,44 +303,24 @@ def stepping_stone(matrix, initial_solution, cost_matrix, depth=0):
                 print("we remove {} from the cell ({},{})".format(min_cost, cycle[i][0], cycle[i+1][0]))
 
         #we go through the solution to see if we values that are negative or greater than the allocated values in total_provisions and total_orders
-        for i in range(n):
-            for j in range(m):
-                if initial_solution[i][j] < 0:
-                    print("The solution is not feasible, the cell ({},{}) has a negative value".format(i,j))
-                    max_posssibility = True
-                    break
-                if initial_solution[i][j] > total_provisions[i]:
-                    print("The solution is not feasible, the cell ({},{}) has a value greater than the total provision".format(i,j))
-                    max_posssibility = True
-                    break
-                if initial_solution[i][j] > total_orders[j]:
-                    print("The solution is not feasible, the cell ({},{}) has a value greater than the total order".format(i,j))
-                    max_posssibility = True
-                    break        
-    
+
         print("New solution: ", initial_solution)
         if not max_posssibility:
-            print("here we go again, we are going down\n")
             initial_solution = stepping_stone(matrix, initial_solution, cost_matrix, depth - 1) 
-            print("we are back to the previous depth {}, we are going up".format(depth))
 
     else:
-        print("here is the final optimized solution : ", initial_solution)
         print("The solution is optimal, the final depth is: ", depth)
 
 
     return initial_solution
 
 if __name__ == "__main__":
-    for i in range(7, 13):
+    for i in range(1, 13):
         print("\n Transportation Problem "+str(i)+":\n")
         data_matrice = rd(str(i)+'.txt')
         cost_matrix = rm(str(i)+'.txt')
         disp(str(i))
         initial_solution = nwa(data_matrice)
-        print("\nInitial Solution:")
-        for i in range(len(initial_solution)):
-            print(i, initial_solution[i])
         result = stepping_stone(data_matrice, initial_solution, cost_matrix)
         print("\nOptimal Solution:")
         for i in range(len(result)):
